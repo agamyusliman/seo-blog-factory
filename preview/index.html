@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kekasir Blog Preview</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #f97316;
+      --navy: #1e3a5f;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 { font-size: 1rem; margin: 0; font-weight: 700; }
+    header h1 span { color: var(--accent); }
+    input[type="search"] {
+      flex: 1;
+      max-width: 420px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+    }
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 58px); }
+    aside {
+      border-right: 1px solid var(--border);
+      padding: 1rem;
+      background: #111827;
+    }
+    aside button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      padding: 0.5rem 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 0.25rem;
+    }
+    aside button.active, aside button:hover {
+      background: var(--panel);
+      color: var(--text);
+    }
+    main { padding: 1.25rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .card:hover { border-color: var(--accent); }
+    .card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: var(--navy);
+      display: block;
+    }
+    .card .body { padding: 0.85rem; }
+    .card .cat { font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+    .card h2 { font-size: 0.98rem; margin: 0.35rem 0; line-height: 1.35; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
+    .meta { margin-top: 0.5rem; font-size: 0.75rem; color: var(--muted); }
+    .detail { max-width: 760px; margin: 0 auto; }
+    .detail .back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .detail article {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      line-height: 1.7;
+    }
+    .detail article img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin: 1rem 0;
+    }
+    .detail article h1, .detail article h2, .detail article h3 { line-height: 1.3; }
+    .detail article a { color: #fb923c; }
+    .empty { color: var(--muted); padding: 2rem 0; }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      background: #0f766e33;
+      color: #5eead4;
+      border: 1px solid #0f766e66;
+    }
+    .kw-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0 0 1rem;
+      align-items: center;
+    }
+    .kw-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-right: 0.15rem;
+    }
+    .kw-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.72rem;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: #cbd5e1;
+      line-height: 1.2;
+    }
+    .kw-badge.primary {
+      background: #ea580c22;
+      border-color: #ea580c66;
+      color: #fdba74;
+      font-weight: 600;
+    }
+    .kw-badge.feature {
+      background: #1e3a8a33;
+      border-color: #3b82f666;
+      color: #93c5fd;
+    }
+    .detail-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0 0 0.85rem;
+    }
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { display: flex; gap: 0.35rem; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+      aside button { white-space: nowrap; width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Kekasir <span>Blog</span> Preview</h1>
+    <input id="q" type="search" placeholder="Cari judul..." />
+    <span id="count" class="badge">0</span>
+  </header>
+  <div class="layout">
+    <aside id="cats"></aside>
+    <main id="main"></main>
+  </div>
+  <script>
+    const state = { catalog: null, category: "all", q: "", view: "list", post: null, body: "" };
+
+    async function loadCatalog() {
+      const res = await fetch("../data/catalog.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("Gagal load catalog.json — jalankan dari http.server di root kekasir-blog");
+      state.catalog = await res.json();
+      renderCats();
+      render();
+    }
+
+    function posts() {
+      const all = (state.catalog && state.catalog.posts) || [];
+      return all.filter(p => {
+        if (state.category !== "all" && p.category !== state.category) return false;
+        if (state.q && !(p.title || "").toLowerCase().includes(state.q.toLowerCase())) return false;
+        return true;
+      });
+    }
+
+    function renderCats() {
+      const cats = (state.catalog && state.catalog.categories) || [];
+      const el = document.getElementById("cats");
+      const items = [{ slug: "all", name: "Semua", count: (state.catalog.posts || []).length }, ...cats];
+      el.innerHTML = items.map(c => `
+        <button data-cat="${c.slug}" class="${state.category === c.slug ? "active" : ""}">
+          ${c.name} (${c.count ?? 0})
+        </button>
+      `).join("");
+      el.querySelectorAll("button").forEach(btn => {
+        btn.onclick = () => {
+          state.category = btn.dataset.cat;
+          state.view = "list";
+          renderCats();
+          render();
+        };
+      });
+    }
+
+    function bust(url) {
+      if (!url) return url;
+      const sep = url.includes("?") ? "&" : "?";
+      return url + sep + "v=" + Date.now();
+    }
+
+    function thumbUrl(p) {
+      if (!p.thumbnail) return "";
+      return bust("../" + p.thumbnail.replace(/^\//, ""));
+    }
+
+    function renderList() {
+      const list = posts();
+      document.getElementById("count").textContent = String(list.length);
+      if (!list.length) {
+        document.getElementById("main").innerHTML = `<div class="empty">Belum ada artikel. Generate dulu, lalu refresh.</div>`;
+        return;
+      }
+      document.getElementById("main").innerHTML = `<div class="grid">${list.map(p => `
+        <div class="card" data-slug="${p.slug}" data-cat="${p.category}">
+          <img src="${thumbUrl(p)}" alt="" onerror="this.style.opacity=.25" />
+          <div class="body">
+            <div class="cat">${p.category || ""}</div>
+            <h2>${escapeHtml(p.title || p.slug)}</h2>
+            <div class="meta">${p.status || ""} · ${p.word_count || "?"} kata</div>
+          </div>
+        </div>
+      `).join("")}</div>`;
+      document.querySelectorAll(".card").forEach(card => {
+        card.onclick = () => openPost(card.dataset.cat, card.dataset.slug);
+      });
+    }
+
+    const FEATURE_LABELS = {
+      hpp_recipe: "HPP & resep",
+      inventory: "stok bahan",
+      reports: "laporan penjualan",
+      pos_core: "aplikasi kasir",
+      qris: "QRIS",
+      qris_self: "bayar QRIS",
+      self_order_qr: "self-order QR meja",
+      catalog_online: "menu digital",
+      theme: "tema katalog",
+      pickup: "order pickup",
+      kds: "KDS dapur",
+      table_mgmt: "manajemen meja",
+      split_bill: "pisah tagihan",
+      split_pay: "multi metode bayar",
+      multi_pay: "pembayaran multi metode",
+      shift: "shift kasir",
+      print: "struk thermal",
+      offline: "kasir offline",
+      multi_outlet: "multi cabang",
+      tax: "pajak PB1",
+      expense: "pengeluaran",
+      combo: "paket combo",
+      pre_order: "pre-order",
+      reservation: "reservasi meja",
+      customer_display: "layar pelanggan",
+      hardware_toko: "perangkat kasir",
+      enterprise: "enterprise",
+      trial: "coba gratis 14 hari",
+      pricing: "harga paket",
+      ai_menu: "import menu foto",
+      hold_order: "parkir order",
+      refund: "refund",
+    };
+
+    function collectKeywords(meta, post) {
+      const out = { primary: "", supporting: [] };
+      const seen = new Set();
+      const add = (label, isPrimary = false) => {
+        const lab = String(label || "").trim();
+        if (!lab) return;
+        const key = lab.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        if (isPrimary) out.primary = lab;
+        else out.supporting.push(lab);
+      };
+
+      if (meta?.keywords?.primary) add(meta.keywords.primary, true);
+      else if (meta?.primary_kw) add(meta.primary_kw, true);
+      else if (post?.title) add(post.title, true);
+
+      (meta?.keywords?.supporting || []).forEach((k) => add(k));
+      (meta?.keywords?.all || []).forEach((k) => add(k));
+      (meta?.tags || []).forEach((t) => add(FEATURE_LABELS[t] || String(t).replace(/_/g, " ")));
+      ((meta?.cta && meta.cta.feature_keys) || []).forEach((t) =>
+        add(FEATURE_LABELS[t] || String(t).replace(/_/g, " "))
+      );
+      if (meta?.persona) add(meta.persona);
+      if (meta?.category) add(meta.category.replace(/-/g, " "));
+      // keep primary out of supporting
+      out.supporting = out.supporting.filter((k) => k.toLowerCase() !== out.primary.toLowerCase()).slice(0, 14);
+      return out;
+    }
+
+    function renderKeywordBar(kw) {
+      if (!kw.primary && !kw.supporting.length) return "";
+      const chips = [];
+      if (kw.primary) {
+        chips.push(`<span class="kw-badge primary">${escapeHtml(kw.primary)}</span>`);
+      }
+      kw.supporting.forEach((k) => {
+        chips.push(`<span class="kw-badge feature">${escapeHtml(k)}</span>`);
+      });
+      return `
+        <div class="kw-bar">
+          <span class="kw-label">Keyword</span>
+          ${chips.join("")}
+        </div>`;
+    }
+
+    async function openPost(category, slug) {
+      const p = ((state.catalog && state.catalog.posts) || []).find(x => x.slug === slug);
+      const base = `../content/${category}/${slug}/`;
+      const [mdRes, metaRes] = await Promise.all([
+        fetch(base + "article.md", { cache: "no-store" }),
+        fetch(base + "meta.json", { cache: "no-store" }).catch(() => null),
+      ]);
+      if (!mdRes.ok) {
+        alert("article.md tidak ditemukan: " + category + "/" + slug);
+        return;
+      }
+      let meta = null;
+      if (metaRes && metaRes.ok) {
+        try { meta = await metaRes.json(); } catch {}
+      }
+      let md = await mdRes.text();
+      md = md.replace(/^---[\s\S]*?---\s*/, "");
+      const v = Date.now();
+      md = md.replace(/\]\((images\/[^)]+)\)/g, `](${base}$1?v=${v})`);
+      const html = DOMPurify.sanitize(marked.parse(md));
+      const kw = collectKeywords(meta, p);
+      const metaLine = [
+        meta?.category || category,
+        meta?.word_count ? `${meta.word_count} kata` : (p?.word_count ? `${p.word_count} kata` : null),
+        meta?.read_minutes ? `${meta.read_minutes} mnt baca` : null,
+        meta?.persona || null,
+      ].filter(Boolean).join(" · ");
+      state.view = "detail";
+      state.post = p;
+      document.getElementById("main").innerHTML = `
+        <div class="detail">
+          <button class="back" id="back">← Kembali</button>
+          ${metaLine ? `<div class="detail-meta">${escapeHtml(metaLine)}</div>` : ""}
+          ${renderKeywordBar(kw)}
+          <article>${html}</article>
+        </div>`;
+      document.getElementById("back").onclick = () => { state.view = "list"; render(); };
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    }
+
+    function render() {
+      if (state.view === "list") renderList();
+    }
+
+    document.getElementById("q").addEventListener("input", e => {
+      state.q = e.target.value;
+      state.view = "list";
+      render();
+    });
+
+    loadCatalog().catch(err => {
+      document.getElementById("main").innerHTML = `<div class="empty">${escapeHtml(err.message)}<br/><br/>
+        Jalankan: <code>cd kekasir-blog && python3 -m http.server 8765</code><br/>
+        Buka: <code>http://localhost:8765/preview/</code></div>`;
+    });
+  </script>
+</body>
+</html>

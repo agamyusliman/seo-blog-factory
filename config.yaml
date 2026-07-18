@@ -1,0 +1,110 @@
+engine: auto
+delay_seconds: 3.0
+max_pages_per_site: 15
+user_agent: "KekasirBlogResearchBot/1.0 (+https://kekasir.id; research)"
+
+daily_cap: 30
+min_words: 500
+max_words: 2000
+default_inline_images: 3
+target_words: 1100
+
+images:
+  provider: grok
+  model: grok-4.5
+  design_system: true
+  use_panduan_screenshots: false
+  fallback_local_brand: true
+  photorealistic: true
+  no_cartoon: true
+  no_batik: true
+  indonesian_faces: true
+  watermark:
+    enabled: true
+    asset: assets/brand/logo-horizontal.png
+    position: top-right
+    max_width_ratio: 0.17
+    opacity: 0.92
+    no_background: true
+    method: post_process_composite
+  thumbnail:
+    width: 1200
+    height: 630
+    aspect: "1.91:1"
+    format: webp
+    quality: 82
+    usage: "og:image, listing card, hero"
+  supporting:
+    width: 1200
+    height: 800
+    aspect: "3:2"
+    format: webp
+    quality: 80
+    usage: "in-article body images"
+  brand_colors:
+    navy: "#1E3A8A"
+    orange: "#EA580C"
+    sky: "#BAE6FD"
+    blue: "#0EA5E9"
+    warm_bg: "#FFFBF5"
+
+categories:
+  - slug: tips-bisnis
+    name: Tips Bisnis
+  - slug: ide-usaha
+    name: Ide Usaha F&B
+  - slug: operasional
+    name: Operasional Kasir & Outlet
+  - slug: info-produk
+    name: Info Produk Kekasir
+  - slug: inspirasi
+    name: Inspirasi & Studi Kasus
+
+sites:
+  qasir:
+    enabled: true
+    list_urls:
+      - "https://blog.qasir.id/"
+      - "https://blog.qasir.id/?page={page}"
+    max_pages: 10
+    engine: httpx
+  kledo:
+    enabled: true
+    list_urls:
+      - "https://kledo.com/blog/"
+      - "https://kledo.com/blog/page/{page}/"
+    sitemap: "https://kledo.com/blog/sitemap_index.xml"
+    max_pages: 5
+    engine: httpx
+  moka:
+    enabled: true
+    list_urls:
+      - "https://www.mokapos.com/blog"
+      - "https://www.mokapos.com/blog/category/tips-bisnis"
+      - "https://www.mokapos.com/blog/category/cerita-sukses"
+      - "https://www.mokapos.com/blog/category/info-produk"
+    max_pages: 3
+    engine: auto
+  olsera:
+    enabled: true
+    list_urls:
+      - "https://olsera.com/id/blog?page={page}"
+      - "https://olsera.com/en/blog?page={page}"
+    max_pages: 5
+    engine: auto
+  esb:
+    enabled: true
+    list_urls:
+      - "https://www.esb.id/id/inspirasi"
+    max_pages: 2
+    engine: cloak
+
+cta_urls:
+  home: "https://kekasir.id/"
+  pricing: "https://kekasir.id/harga"
+  qris: "https://kekasir.id/qris-dinamis"
+  register: "https://dashboard.kekasir.id/register"
+  wa: "https://wa.me/6283193533330"
+  toko: "https://kekasir.id/toko"
+  katalog: "https://kekasir.id/toko/katalog"
+  enterprise: "https://kekasir.id/enterprise"

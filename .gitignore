@@ -1,0 +1,66 @@
+# --- Secrets & local env (NEVER commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+**/secrets/**
+**/credentials/**
+
+# --- Python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# --- Runtime / generated (local only) ---
+logs/
+*.log
+rag/index/
+data/queue.jsonl
+data/state.json
+data/refs/
+data/catalog.json
+data/panduan_assets_manifest.json
+content/**
+!content/.gitkeep
+
+# Generated media (except brand logo source)
+*.webp
+!assets/brand/**
+
+# --- Large / private media (demo UI screenshots) ---
+assets/panduan/
+
+# Generated watermark caches (logo-horizontal.png is the source of truth)
+assets/brand/kekasir-watermark.png
+assets/brand/kekasir-logo-horizontal.png
+
+# --- Node (optional future) ---
+node_modules/
+
+# --- Local overrides ---
+config.local.yaml
+*.local.yaml
