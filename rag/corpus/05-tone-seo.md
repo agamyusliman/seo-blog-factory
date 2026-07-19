@@ -7,7 +7,9 @@
 - **Anti AI-slop**: jangan klise “Yuk mulai…”, “di dunia F&B”, kategori menu bintang/kuda pacu/teka-teki/beban.
 - Hindari jargon engineering (webhook, multi-tenant, schema).
 - Boleh istilah yang sudah lazim: omzet, HPP, margin, shift, stok, QRIS, resep, porsi.
-- Angle lokal **Batam / Tanjungpinang / Bintan / Kepri** boleh (lihat `08-local-kepri.md`).
+- Angle lokal **Batam / Tanjungpinang** (kota saja) boleh; **jangan** kelurahan/area dalam kota (lihat `08-local-kepri.md`).
+- Perbanyak frasa **aplikasi kasir**, **point of sales**, **POS** secara alami.
+- Sudut **masalah → solusi** (tantangan operasional + jawaban produk) diutamakan.
 
 ## Struktur artikel
 
@@ -15,7 +17,7 @@
 - H1 = title
 - Minimal 4 H2
 - Wajib ada bullet atau numbered list (tidak flat paragraf saja)
-- 1–5 gambar inline + 1 thumbnail (AI design system / fallback brand; **bukan** screenshot panduan)
+- 1–5 gambar inline + 1 thumbnail: **ilustrasi brand** (alur/diagram/infografis warna Kekasir), **bukan** foto realistis, **bukan** screenshot panduan
 - Satu CTA relevan di akhir; soft CTA di tengah boleh sekali
 - Related posts 2–5 (slug nyata)
 

@@ -10,6 +10,8 @@ BRAND = {
     "blue": "#0EA5E9",
     "warm_bg": "#FFFBF5",
     "slate": "#1E293B",
+    "slate_body": "#334155",
+    "wa": "#25D366",
 }
 
 IMAGE_SPECS: dict[str, dict[str, Any]] = {
@@ -29,7 +31,7 @@ IMAGE_SPECS: dict[str, dict[str, Any]] = {
         "width": 1200,
         "height": 800,
         "aspect": "3:2",
-        "aspect_label": "In-article photo (3:2)",
+        "aspect_label": "In-article illustration (3:2)",
         "filename_pattern": "fig-{nn:02d}.webp",
         "webp_quality": 80,
         "prompt_size_line": "exact framing for 1200x800 px (3:2 landscape in-article)",
@@ -37,80 +39,124 @@ IMAGE_SPECS: dict[str, dict[str, Any]] = {
     },
 }
 
-PHOTO_RULES = """
-PHOTO REALISM RULES (MANDATORY):
-- Photorealistic editorial photography ONLY (not cartoon, not flat illustration, not 3D render, not anime, not vector)
-- Real human subjects with Indonesian faces (Southeast Asian / Nusantara features), natural skin tones
-- Clothing ALWAYS varies per image: plain solid colors, polo, plain kemeja, kaos, apron dapur — NEVER batik, NEVER traditional batik motif
-- Different outfit each generation so the series does not look copy-paste
-- Indonesian F&B UMKM setting matching context: warung, cafe, resto kecil, dapur, gerobak, bazar, kontainer
-- NO readable third-party logos, brand names, soft-drink logos, payment logos, fashion logos, app store badges
-- NO cartoon mascot, clipart, plastic CGI look
-- Keep faces and main subject inside SAFE ZONE (not cut by edges)
-- Do NOT draw any kekasir watermark in the scene (watermark is applied later in post-process)
-- FORBIDDEN: software UI screenshots, dashboard mockups, fake app screens, admin panel photos, product tutorial screenshots
-- Prefer real physical scenes (people, food, kitchen, notes, cash) over digital screens
-
-FULL-BLEED / NO FRAME (CRITICAL — never violate):
-- Image MUST be full-bleed edge-to-edge: scene fills 100% of the canvas
-- FORBIDDEN: white/gray/black border, picture frame, mat, polaroid edge, postcard margin, drop shadow around the photo, vignette that looks like a card on a background
-- FORBIDDEN: photo floating on a blank canvas, mockup frame, laptop/phone frame unless the article is specifically about a device UI (even then fill the whole canvas)
-- Background of the real scene must touch all four edges of the image
+ILLUSTRATION_RULES = f"""
+ILLUSTRATION STYLE (MANDATORY — NOT photorealistic photos):
+- Flat / modern editorial ILLUSTRATION or clean vector-style infographic
+- Informative first: explain a concept, process, comparison, or checklist visually
+- Soft shadows, rounded shapes, generous whitespace, SaaS marketing aesthetic
+- Color system (Kekasir brand — use these hex values):
+  - Navy primary: {BRAND["navy"]} (headings, main shapes, icons)
+  - Orange accent: {BRAND["orange"]} (CTA, highlights, active steps)
+  - Sky: {BRAND["sky"]} (soft backgrounds, cards)
+  - Blue: {BRAND["blue"]} (secondary icons, arrows, links)
+  - Warm cream bg: {BRAND["warm_bg"]} or clean white / light slate
+  - Body text dark: {BRAND["slate"]}
+- Typography in-image: short Indonesian labels only (2–6 words per label), clean sans-serif
+- FORBIDDEN: photorealistic humans, stock photo faces, batik, third-party logos, app store badges
+- FORBIDDEN: screenshot UI dashboard palsu dengan brand lain, foto kamera realistis
+- FORBIDDEN: white picture frame / polaroid border around the art; full-bleed illustration to edges
+- Do NOT draw kekasir watermark text in the scene (watermark applied in post-process)
+- No cluttered meme style; keep professional F&B POS / UMKM SaaS look
 """.strip()
 
-CATEGORY_SCENE = {
-    "tips-bisnis": "Indonesian warung owner at counter reviewing notes and phone, warm afternoon light",
-    "ide-usaha": "young Indonesian entrepreneur plating food in small kitchen startup space",
-    "operasional": "busy Indonesian cafe counter, staff with POS tablet, natural indoor light",
-    "info-produk": "Indonesian owner using tablet POS at clean modern warung/cafe counter (device screen blurred, no brand UI)",
-    "inspirasi": "confident Indonesian F&B owner in small restaurant, soft natural documentary portrait",
+CATEGORY_ILLUSTRATION = {
+    "tips-bisnis": "infographic cards and simple process arrows about business tips",
+    "ide-usaha": "idea board / startup F&B concept illustration with icons",
+    "operasional": "operations flowchart: order → kitchen → payment → report",
+    "info-produk": "product feature diagram: POS, QRIS, reports as icon modules",
+    "inspirasi": "before/after digitalization illustration (manual notes → modern POS)",
 }
 
-CLOTHING_VARIANTS = [
-    "plain navy polo shirt",
-    "simple white crew-neck t-shirt under light gray apron",
-    "solid charcoal short-sleeve work shirt",
-    "plain olive green henley",
-    "solid black polo with sleeves rolled",
-    "light blue plain button shirt (no pattern)",
-    "maroon plain t-shirt and beige half-apron",
-    "solid cream shirt, no motifs",
-]
+
+def _detect_visual_mode(section_heading: str, section_excerpt: str, alt: str) -> str:
+    blob = f"{section_heading} {section_excerpt} {alt}".lower()
+    if any(
+        k in blob
+        for k in (
+            "alur",
+            "flow",
+            "proses",
+            "langkah",
+            "cara kerja",
+            "tahap",
+            "workflow",
+            "order masuk",
+            "dari order",
+            "step",
+        )
+    ):
+        return "process_flow"
+    if any(k in blob for k in ("banding", "vs", "basic", "pro", "paket", "harga", "perbandingan")):
+        return "comparison"
+    if any(k in blob for k in ("checklist", "daftar", "siapkan", "persiapan", "tips singkat")):
+        return "checklist"
+    if any(k in blob for k in ("hpp", "margin", "biaya", "hitung", "rumus", "persentase")):
+        return "formula_diagram"
+    if any(k in blob for k in ("qris", "bayar", "pembayaran", "settlement", "pencairan")):
+        return "payment_flow"
+    if any(k in blob for k in ("shift", "tutup kas", "selisih", "rekap")):
+        return "shift_diagram"
+    if any(k in blob for k in ("masalah", "tantangan", "solusi", "kendala", "error", "gagal")):
+        return "problem_solution"
+    return "concept_icons"
 
 
-def _clothing_line(index: int = 1) -> str:
-    outfit = CLOTHING_VARIANTS[(max(1, index) - 1) % len(CLOTHING_VARIANTS)]
-    return (
-        f"Subject clothing this frame: {outfit}. "
-        "Must differ from other images in the series. Absolutely no batik fabric or batik print."
-    )
+def _mode_instructions(mode: str) -> str:
+    modes = {
+        "process_flow": (
+            "Draw a LEFT-TO-RIGHT or TOP-TO-BOTTOM process FLOW DIAGRAM with 3–6 numbered steps, "
+            "rounded rectangles, navy→orange accent arrows, short Indonesian step labels. "
+            "Looks like a product explainer, not a photo."
+        ),
+        "comparison": (
+            "Two-column or side-by-side comparison cards (e.g. Basic vs Pro, manual vs digital) "
+            "with checkmarks, navy headers, orange highlights."
+        ),
+        "checklist": (
+            "Vertical checklist illustration with rounded cards, orange check icons, clear Indonesian items."
+        ),
+        "formula_diagram": (
+            "Clean formula / HPP–margin diagram: boxes for bahan, porsi, harga jual, margin %; "
+            "simple math visual, no messy handwriting photo."
+        ),
+        "payment_flow": (
+            "Payment flow: customer → QRIS scan → konfirmasi → laporan; icons only, brand colors."
+        ),
+        "shift_diagram": (
+            "Shift lifecycle diagram: buka shift → transaksi → tutup kas → selisih; numbered steps."
+        ),
+        "problem_solution": (
+            "Split layout: left muted problem icons, right bright solution (POS / apps) with orange accent."
+        ),
+        "concept_icons": (
+            "Hero illustration with 3–5 feature icons around a central POS/tablet motif, sky soft background."
+        ),
+    }
+    return modes.get(mode, modes["concept_icons"])
 
 
 def thumbnail_prompt(title: str, category: str, persona: str = "") -> str:
     spec = IMAGE_SPECS["thumbnail"]
-    scene = CATEGORY_SCENE.get(category, CATEGORY_SCENE["tips-bisnis"])
-    persona_bit = f" Persona: {persona}." if persona else ""
+    scene = CATEGORY_ILLUSTRATION.get(category, CATEGORY_ILLUSTRATION["tips-bisnis"])
+    persona_bit = f" Audience: {persona}." if persona else ""
     return f"""
-ROLE: BLOG THUMBNAIL / FEATURED PHOTO (not an in-article figure).
+ROLE: BLOG THUMBNAIL / FEATURED ILLUSTRATION (not a photograph).
 SIZE / SEO FRAME: {spec['prompt_size_line']}
 Target export: {spec['width']}x{spec['height']} px, aspect {spec['aspect']}.
 
 Topic: "{title}"
 Category: {category}.{persona_bit}
-Hero scene: {scene}, clearly related to the article topic.
+Visual concept: {scene}, clearly related to the article topic (F&B POS / aplikasi kasir / point of sales).
 
 THUMBNAIL composition:
-- Single strong focal subject readable at small card size
-- Subject left/center; soft environmental depth on the right
-- Natural bokeh background, not cluttered
-- Important subject not glued to extreme edges (camera framing), but PHOTO IS FULL-BLEED (no empty frame border)
-- ONE clear story moment — no collage
+- One strong central visual idea readable at small card size
+- Optional short title-like label (max 5 words) in Indonesian if helpful
+- Soft brand sky/warm background, navy + orange accents
+- FULL-BLEED illustration edge-to-edge
 
-{_clothing_line(1)}
+{ILLUSTRATION_RULES}
 
-{PHOTO_RULES}
-
-Output: one photorealistic FULL-BLEED landscape photo filling the entire frame edge-to-edge, no border, no mat, no caption text, no third-party brands.
+Output: one polished brand illustration, full-bleed, no photo realism, no third-party brands.
 """.strip()
 
 
@@ -126,46 +172,46 @@ def supporting_prompt(
     placement: str = "",
 ) -> str:
     spec = IMAGE_SPECS["supporting"]
-    focus = (alt or "").strip() or f"supporting photo {index} about {title}"
-    feats = ", ".join(feature_keys or []) or "F&B outlet operations"
+    focus = (alt or "").strip() or f"supporting illustration {index} about {title}"
+    feats = ", ".join(feature_keys or []) or "F&B POS operations"
     heading = (section_heading or "").strip() or "(intro / opening section)"
     excerpt = (section_excerpt or "").strip()
     if len(excerpt) > 420:
         excerpt = excerpt[:420].rsplit(" ", 1)[0] + "…"
     place = (placement or "").strip() or "inline after related section"
+    mode = _detect_visual_mode(heading, excerpt, focus)
+    mode_help = _mode_instructions(mode)
+
     return f"""
-ROLE: IN-ARTICLE SUPPORTING PHOTO placed inside a specific article section (not the main og:image thumbnail).
+ROLE: IN-ARTICLE SUPPORTING ILLUSTRATION for a specific article section (not photorealistic photo).
 SIZE / SEO FRAME: {spec['prompt_size_line']}
 Target export: {spec['width']}x{spec['height']} px, aspect {spec['aspect']}.
 
 Article title: "{title}" (category: {category})
 Figure index: {index} of {total}
-Placement in article: {place}
+Placement: {place}
 Nearest section heading (H2/H3): {heading}
-Section excerpt / paragraph context the photo must match:
+Section excerpt the visual must explain:
 \"\"\"{excerpt or focus}\"\"\"
 
-Photo purpose / alt intent (must match this section's redaction): {focus}
+Alt / intent: {focus}
 Feature context: {feats}
+Detected visual mode: {mode}
 
-SECTION-MATCH RULES (CRITICAL):
-- The photo MUST visually illustrate THIS section's topic and nearby paragraphs — not a random F&B stock scene
-- If section is about counting HPP/costs: show writing notes, ingredients, calculator, comparing prices
-- If section is about waste/susut/cadangan: show kitchen ingredients, leftover handling, careful portioning
-- If section is about pricing/margin: show menu board / price thinking / comparing costs (no software UI)
-- If section is about checklist/closing: show calm end-of-day review with notes
-- Prefer physical real-world props over digital screens; NO app dashboard screenshots
+SECTION-MATCH (CRITICAL):
+- Illustration MUST teach THIS section's idea (flow, formula, checklist, comparison, or concept)
+- If section describes a business process → use a clear FLOW / ALUR diagram with steps
+- If section is about costs/HPP → formula or cost-structure diagram
+- If section is about payment/QRIS → payment flow diagram
+- Prefer informative diagrams over decorative scenery
+- Short Indonesian labels on nodes only; no long paragraphs inside the image
 
-SUPPORTING PHOTO rules:
-- Documentary / explanatory, ONE clear idea
-- Feels like content photography, not ad banner
-- FULL-BLEED: scene touches all four edges — never a framed photo on a blank background
+MODE INSTRUCTIONS:
+{mode_help}
 
-{_clothing_line(index)}
+{ILLUSTRATION_RULES}
 
-{PHOTO_RULES}
-
-Output: one photorealistic FULL-BLEED landscape photo filling the entire canvas edge-to-edge, no border, no mat, no frame, no caption text, no third-party brands.
+Output: one full-bleed informative brand illustration matching the section, no photorealism, no third-party brands.
 """.strip()
 
 

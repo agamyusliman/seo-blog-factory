@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import io
+import itertools
 import os
 import re
 from pathlib import Path
@@ -13,6 +14,37 @@ from dotenv import load_dotenv
 from paths import ROOT
 
 load_dotenv(ROOT / ".env")
+
+
+# Multi-model chat: AI_CHAT_MODELS (comma-separated, round-robin) or AI_CHAT_MODEL (single).
+# Image stays single AI_IMAGE_MODEL (grok-4.5).
+_CHAT_MODELS: list[str] | None = None
+_CHAT_CYCLE: itertools.cycle | None = None
+_LAST_CHAT_MODEL: str = ""
+
+
+def last_chat_model() -> str:
+    return _LAST_CHAT_MODEL
+
+
+def _chat_models() -> list[str]:
+    global _CHAT_MODELS, _CHAT_CYCLE
+    if _CHAT_MODELS is not None:
+        return _CHAT_MODELS
+    raw = os.environ.get("AI_CHAT_MODELS") or os.environ.get("KEKASIR_AI_CHAT_MODELS") or ""
+    models = [m.strip() for m in raw.split(",") if m.strip()]
+    if not models:
+        single = os.environ.get("AI_CHAT_MODEL", os.environ.get("KEKASIR_AI_CHAT_MODEL", "grok-4.5"))
+        models = [single]
+    _CHAT_MODELS = models
+    _CHAT_CYCLE = itertools.cycle(models)
+    return models
+
+
+def _next_chat_model() -> str:
+    _chat_models()
+    assert _CHAT_CYCLE is not None
+    return next(_CHAT_CYCLE)
 
 
 def _base() -> str:
@@ -43,24 +75,37 @@ def chat(
     temperature: float = 0.7,
     timeout: int = 180,
 ) -> str:
-    model = model or os.environ.get(
-        "AI_CHAT_MODEL", os.environ.get("KEKASIR_AI_CHAT_MODEL", "grok-4.5")
-    )
-    payload = {
-        "model": model,
-        "messages": messages,
-        "stream": False,
-        "temperature": temperature,
-    }
-    r = requests.post(
-        f"{_base()}/chat/completions",
-        headers=_headers(),
-        json=payload,
-        timeout=timeout,
-    )
-    r.raise_for_status()
-    data = r.json()
-    return data["choices"][0]["message"]["content"]
+    global _LAST_CHAT_MODEL
+    models = [model] if model else _chat_models()
+    if not model and _CHAT_CYCLE is not None:
+        start = next(_CHAT_CYCLE)
+        models = [start] + [m for m in models if m != start]
+
+    last_err: Exception | None = None
+    for m in models:
+        payload = {
+            "model": m,
+            "messages": messages,
+            "stream": False,
+            "temperature": temperature,
+        }
+        try:
+            r = requests.post(
+                f"{_base()}/chat/completions",
+                headers=_headers(),
+                json=payload,
+                timeout=timeout,
+            )
+            r.raise_for_status()
+            data = r.json()
+            _LAST_CHAT_MODEL = m
+            return data["choices"][0]["message"]["content"]
+        except (requests.HTTPError, requests.RequestException, KeyError, ValueError) as e:
+            last_err = e
+            continue
+    if last_err:
+        raise last_err
+    raise RuntimeError("no chat models configured")
 
 
 def _extract_b64_from_responses(data: dict[str, Any]) -> str | None:

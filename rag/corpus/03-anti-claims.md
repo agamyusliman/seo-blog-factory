@@ -46,8 +46,11 @@
 - JANGAN bilang settlement QRIS selalu **instan hari yang sama** (standar **T+2 hari kerja**).
 - Detail: `10-legal-compliance.md` + https://kekasir.id/syarat-ketentuan
 
-## Studi kasus
+## Studi kasus & lokasi
 
 - JANGAN invent angka omzet merchant fiktif seolah testimonial nyata.
-- BOLEH: skenario hipotetis **F&B** yang jelas ditandai sebagai contoh.
-- Vertical studi kasus: warung, cafe, resto, katering, gerobak, cloud kitchen, bakery, food court stall — **bukan** ritel/jasa.
+- BOLEH: skenario hipotetis **F&B** yang jelas ditandai sebagai contoh / alur.
+- Vertical: warung, cafe, resto, katering, gerobak, cloud kitchen, bakery, food court stall — **bukan** ritel/jasa.
+- JANGAN klaim “usaha di [kelurahan/area] sudah pakai Kekasir” (hoax).
+- Keyword kota **hanya** Batam / Tanjungpinang (opsional Kepri) — **bukan** Batu Aji, Sekupang, Nagoya, Lagoi, Harbour Bay, dll. sebagai studi kasus lokasi.
+- Detail: `08-local-kepri.md`.

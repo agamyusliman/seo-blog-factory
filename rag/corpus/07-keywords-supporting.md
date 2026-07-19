@@ -17,7 +17,7 @@ Modifier opsional (variasi title, jangan di-stuff body):
 
 ---
 
-## Cluster A — Aplikasi kasir & POS (info-produk / tips)
+## Cluster A — Aplikasi kasir & POS / Point of Sales (info-produk / tips)
 
 ### Primary-class
 - aplikasi kasir
@@ -26,10 +26,16 @@ Modifier opsional (variasi title, jangan di-stuff body):
 - aplikasi kasir cafe
 - aplikasi kasir warung
 - aplikasi kasir UMKM
+- point of sales
+- point of sales restoran
+- point of sales UMKM
 - software kasir
 - sistem POS
+- sistem point of sales
 - mesin kasir digital
 - kasir online
+- POS F&B
+- POS restoran
 
 ### Supporting / LSI
 - aplikasi kasir HP

@@ -3,12 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
 from typing import Any
 
-from ai_client import chat
+from ai_client import chat, last_chat_model
 from common import (
     count_words,
     load_catalog,
@@ -23,24 +24,36 @@ from validate_article import meta_from_body, validate_article
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-SYSTEM = """Kamu penulis artikel blog Kekasir.id untuk pemilik usaha kuliner di Indonesia (termasuk Batam, Tanjungpinang, Bintan, Kepri).
+SYSTEM = """Kamu penulis artikel blog Kekasir.id untuk pemilik usaha kuliner di Indonesia.
 
 BAHASA (paling penting):
 - Tulis Bahasa Indonesia yang natural, hidup, mudah dipahami warung/cafe — BUKAN terjemahan Inggris.
 - JANGAN AI-slop: "Yuk mulai dari dasar", "Mari kita bedah", "Tanpa basa-basi", "di dunia F&B", "di era digital", "rahasia sukses".
 - JANGAN istilah asing yang tidak lazim di lapangan: food cost, food costing, waste, buffer, markup (sebagai kata utama), bill of material, COGS, menu engineering, menu bintang, menu kuda pacu, menu teka-teki, menu beban, overhead (pakai "biaya operasional"), FIFO tanpa penjelasan.
 - GANTI: food cost→biaya bahan/HPP; waste→sisa dapur/bahan terbuang/susut; buffer→cadangan/antisipasi susut; markup→pengali harga/naikkan dari HPP; menu engineering→evaluasi/analisa menu laris; menu bintang→menu andalan laris untung; kuda pacu→laris tapi untung tipis; teka-teki→untung tapi sepi; beban→sepi dan merugikan.
-- Boleh: HPP, QRIS, omzet, margin, stok, shift, resep, porsi, promo. "F&B" jarang saja; utamakan "usaha kuliner/warung/cafe/restoran".
+- Boleh & perbanyak alami: HPP, QRIS, omzet, margin, stok, shift, resep, porsi, promo, **aplikasi kasir**, **point of sales**, **POS**, sistem kasir.
+- "F&B" jarang saja; utamakan "usaha kuliner/warung/cafe/restoran".
 - Nada seperti orang lokal menjelaskan ke sesama pengusaha, bukan dosen atau brosur luar negeri.
+
+LOKASI (anti-hoax):
+- Keyword kota BOLEH: **Batam**, **Tanjungpinang** (opsional Kepri). Artinya: ada SaaS POS di kota itu — BUKAN klaim merchant spesifik.
+- JANGAN sebut kelurahan/area dalam kota sebagai studi kasus: Nagoya, Batu Aji, Sekupang, Batam Centre, Harbour Bay, Lagoi, Tanjung Uban, Senggarang, dll.
+- JANGAN klaim "usaha di [daerah] sudah pakai Kekasir". Boleh skenario hipotetis: "misalnya warung di Batam…", "contoh alur…".
+- Ide usaha generik OK tanpa alamat fiktif.
+
+SUDUT MASALAH → SOLUSI:
+- Utamakan artikel yang menjawab masalah/tantangan operasional (nota berantakan, antrian, selisih kas, internet putus, HPP kacau, order dapur salah, dll.) lalu tawarkan solusi dengan aplikasi kasir / point of sales Kekasir.
+- Pakai fakta FAQ: trial 14 hari Pro, Basic vs Pro, offline, self-order, KDS, shift, QRIS T+2, dll. tanpa mengarang.
 
 ISI:
 - ORIGINAL, jangan plagiat. Hanya usaha kuliner (bukan retail/jasa salon-laundry).
 - 500–2000 kata (target 900–1400). Intro + min 4 H2 + bullet/list + CTA penutup.
 - Gambar inline: tepat {n_images} buah, format ![alt deskriptif](images/fig-01.webp) … fig-0N.
 - PENEMPATAN GAMBAR (wajib):
-  - fig-01 setelah intro (sebelum H2 pertama) — suasana sesuai topik artikel.
+  - fig-01 setelah intro (sebelum H2 pertama).
   - fig-02… setelah H2 yang relevan (bukan diacak di akhir).
-  - Alt text WAJIB menjelaskan adegan nyata yang cocok dengan section di sekitarnya (bahasa Indonesia, fotorealistik, orang Indonesia, tanpa UI software).
+  - Alt text = deskripsi **ilustrasi informatif** sesuai section: alur/proses, diagram, checklist, perbandingan, formula — BUKAN foto realistis orang.
+  - Contoh alt: "Ilustrasi alur order dari kasir ke dapur", "Diagram hitung HPP dan margin".
   - Jangan menaruh semua gambar berurutan; sisipkan di tengah redaksi section terkait.
 - Patuhi FAKTA PRODUK & LEGAL: Basic Rp60.000 / Pro Rp120.000 (tahunan Rp576.000 / Rp1.152.000), trial 14 hari Pro sekali per WA, QRIS ~0,7% tanpa markup Kekasir, settlement ~T+2 hari kerja.
 - Self-order QR meja / KDS / reservasi = Pro (atau trial Pro).
@@ -48,6 +61,21 @@ ISI:
 - Jangan janji refund langganan bebas, refund QRIS otomatis, MDR dikembalikan, atau surcharge QRIS ke pelanggan.
 - Jika sebut harga/QRIS/refund, boleh taut ke /syarat-ketentuan, /kebijakan-privasi, /kebijakan-refund.
 - Internal link hanya [[link:slug|anchor]] ke RELATED_SLUGS.
+
+PANDUAN BACKLINK (WAJIB):
+- Setiap outlet punya katalog online otomatis (mirip Linktree F&B) di `kekasir.id/{slug-outlet}`: profil outlet + menu online + QR self-order + pickup order + bayar QRIS auto-confirm.
+- Boleh sisipkan 1–2 backlink ke panduan Kekasir bila topik artikel berkaitan langsung. Format natural: "Pelajari [topik] di panduan Kekasir: https://kekasir.id/panduan/..." atau "Tonton video tutorial [topik]: https://www.youtube.com/watch?v=...".
+- Jangan spam backlink. Hanya taut yang relevan dengan section.
+- Panduan populer: setup QRIS (/panduan/owner/qris), kelola meja + QR self-order (/panduan/outlet/kelola-meja), konfigurasi bisnis outlet (/panduan/outlet/konfigurasi-bisnis), kelola produk (/panduan/outlet/kelola-produk), upgrade paket (/panduan/owner/upgrade-paket), inventori & HPP (/panduan/outlet/inventori-hpp), shift kasir (/panduan/outlet/shift-kasir), katalog & self-order (/panduan/outlet/pengaturan/katalog-self-order), staff & perangkat (/panduan/outlet/staff-perangkat), kupon & diskon (/panduan/outlet/kupon-diskon).
+- Video YouTube: daftar owner (tLrLXU1Tklk), tambah outlet (kFDrN-VRrD0), upgrade paket (DcwUSF3yNIA), konfigurasi bisnis (gABYci3oQhg), kelola produk (IuBeR6ola0g), kelola meja (MMWQbmEIECw).
+
+KATALOG ONLINE + SELF-ORDER EMPHASIS:
+- Artikel yang bahas usaha rumahan / katering / bakery / pre-order / cloud kitchen → sebut katalog online sebagai "etalase digital" (slug custom, profil outlet, menu online, share ke IG/WA/TikTok).
+- Artikel yang bahas cafe / resto duduk / antrian / peak hour → sebut self-order QR meja (Pro) + KDS dapur.
+- Artikel yang bahas pembayaran / QRIS → sebut QRIS auto-confirm di self-order: pelanggan bayar dari HP, kasir langsung tercatat tanpa konfirmasi manual.
+- Jangan bilang katalog online "gratis terpisah" — katalog online bawaan ekosistem Kekasir per outlet.
+- Custom tema Linktree-style (banner, warna brand, sosmed) = Pro. Tema dasar bawaan semua paket.
+
 - Primary keyword alami di title, intro, 1 H2 — jangan dipaksa tiap kalimat.
 - Output HANYA markdown (boleh # title). Tanpa JSON, tanpa catatan meta.
 """
@@ -80,7 +108,7 @@ Outline:
 Tulis artikel lengkap sekarang.
 Sisipkan tepat {n_images} gambar di section yang relevan:
 ![alt cocok section](images/fig-01.webp) … sampai fig-{n_images:02d}.webp
-Alt = deskripsi foto realistis sesuai paragraf di atas/bawah gambar (bukan "ilustrasi generik").
+Alt = deskripsi ilustrasi informatif (alur/diagram/checklist) sesuai paragraf di atas/bawah — bukan foto realistis, bukan "ilustrasi generik".
 """
 
 
@@ -226,7 +254,7 @@ def write_article(job: dict[str, Any], body: str, cfg: dict[str, Any]) -> Path:
         "persona": job.get("persona"),
         "created_at": now_iso(),
         "updated_at": now_iso(),
-        "model": "grok-4.5",
+        "model": last_chat_model() or os.environ.get("AI_CHAT_MODEL", "grok-4.5"),
         "n_images": n_images,
     }
     front = (

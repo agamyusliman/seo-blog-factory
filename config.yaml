@@ -15,10 +15,11 @@ images:
   design_system: true
   use_panduan_screenshots: false
   fallback_local_brand: true
-  photorealistic: true
-  no_cartoon: true
-  no_batik: true
-  indonesian_faces: true
+  photorealistic: false
+  illustration: true
+  informative_diagrams: true
+  no_photoreal_humans: true
+  brand_illustration: true
   watermark:
     enabled: true
     asset: assets/brand/logo-horizontal.png
