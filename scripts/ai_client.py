@@ -70,16 +70,58 @@ def _headers() -> dict[str, str]:
     }
 
 
+def fix_mojibake(text: str) -> str:
+    """Repair UTF-8 text that was mis-decoded as latin-1 (e.g. → becomes â\x86\x92)."""
+    if not text:
+        return text
+    if any(m in text for m in ("â", "Ã", "Â", "ð")):
+        try:
+            repaired = text.encode("latin-1").decode("utf-8")
+            if sum(repaired.count(c) for c in ("â", "Ã", "Â")) < sum(text.count(c) for c in ("â", "Ã", "Â")):
+                text = repaired
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            pass
+    # Hard replacements for common leftovers
+    replacements = {
+        "â": "→",
+        "â": "—",
+        "â": "–",
+        "â¦": "…",
+        "â": "“",
+        "â": "”",
+        "â": "‘",
+        "â": "’",
+        "Ã·": "÷",
+        "Ã": "×",
+        "Â°": "°",
+        "Â·": "·",
+        "â¢": "•",
+        "â": "≈",
+        "â¤": "≤",
+        "â¥": "≥",
+        "Â ": " ",
+    }
+    for bad, good in replacements.items():
+        if bad in text:
+            text = text.replace(bad, good)
+    return text
+
+
 def _parse_sse_stream(resp: requests.Response) -> dict[str, Any]:
-    """Parse SSE chunks dari gateway. Return gabungan delta content + usage."""
     content_parts: list[str] = []
     model_name = ""
     usage: dict[str, Any] | None = None
     finish_reason = ""
-    for raw in resp.iter_lines(decode_unicode=True):
+    # Gateway returns text/event-stream without charset; force UTF-8 so → — ÷ stay intact.
+    resp.encoding = "utf-8"
+    for raw in resp.iter_lines(decode_unicode=False):
         if not raw:
             continue
-        line = raw.strip()
+        try:
+            line = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            line = raw.decode("utf-8", errors="replace")
+        line = line.strip()
         if not line.startswith("data:"):
             continue
         payload = line[5:].strip()
@@ -100,8 +142,9 @@ def _parse_sse_stream(resp: requests.Response) -> dict[str, Any]:
                 content_parts.append(delta["content"])
             if choices[0].get("finish_reason"):
                 finish_reason = choices[0]["finish_reason"]
+    content = fix_mojibake("".join(content_parts))
     return {
-        "content": "".join(content_parts),
+        "content": content,
         "model": model_name,
         "usage": usage,
         "finish_reason": finish_reason,
@@ -142,7 +185,7 @@ def chat(
             if not content:
                 raise ValueError(f"empty content from {parsed.get('model', m)}")
             _LAST_CHAT_MODEL = parsed.get("model") or m
-            return content
+            return fix_mojibake(content)
         except (requests.HTTPError, requests.RequestException, KeyError, ValueError) as e:
             last_err = e
             continue

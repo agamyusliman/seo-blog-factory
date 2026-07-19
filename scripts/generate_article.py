@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from ai_client import chat, last_chat_model
+from ai_client import chat, fix_mojibake, last_chat_model
 from common import (
     count_words,
     load_catalog,
@@ -273,6 +273,7 @@ def write_article(job: dict[str, Any], body: str, cfg: dict[str, Any]) -> Path:
     )
     if not body.lstrip().startswith("#"):
         body = f"# {job['title']}\n\n{body}"
+    body = fix_mojibake(body)
     (folder / "article.md").write_text(front + body, encoding="utf-8")
     (folder / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return folder
