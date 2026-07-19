@@ -39,6 +39,7 @@ Thumbs.db
 logs/
 *.log
 rag/index/
+rag/corpus/published/
 data/queue.jsonl
 data/state.json
 data/refs/

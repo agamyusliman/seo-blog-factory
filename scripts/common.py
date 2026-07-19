@@ -76,7 +76,7 @@ def load_state() -> dict[str, Any]:
             "last_heartbeat": None,
             "last_job_id": None,
             "counters": {"done_today": 0, "failed_today": 0, "images_today": 0},
-            "daily_cap": 30,
+            "daily_cap": 0,
             "date": datetime.now().date().isoformat(),
         }
         save_state(st)

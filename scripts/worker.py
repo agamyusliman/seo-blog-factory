@@ -26,9 +26,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 def daily_cap_ok(cfg: dict[str, Any]) -> bool:
     st = load_state()
-    cap = int(cfg.get("daily_cap") or os.environ.get("BLOG_DAILY_CAP") or 30)
+    raw = cfg.get("daily_cap") or os.environ.get("BLOG_DAILY_CAP") or "0"
+    cap = int(raw) if str(raw).isdigit() else 0
     st["daily_cap"] = cap
     save_state(st)
+    if cap <= 0:
+        return True
     return st.get("counters", {}).get("done_today", 0) < cap
 
 

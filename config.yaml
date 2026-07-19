@@ -3,7 +3,7 @@ delay_seconds: 3.0
 max_pages_per_site: 15
 user_agent: "KekasirBlogResearchBot/1.0 (+https://kekasir.id; research)"
 
-daily_cap: 30
+daily_cap: 0
 min_words: 500
 max_words: 2000
 default_inline_images: 3
