@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import io
 import itertools
+import json
 import os
 import re
 from pathlib import Path
@@ -69,6 +70,44 @@ def _headers() -> dict[str, str]:
     }
 
 
+def _parse_sse_stream(resp: requests.Response) -> dict[str, Any]:
+    """Parse SSE chunks dari gateway. Return gabungan delta content + usage."""
+    content_parts: list[str] = []
+    model_name = ""
+    usage: dict[str, Any] | None = None
+    finish_reason = ""
+    for raw in resp.iter_lines(decode_unicode=True):
+        if not raw:
+            continue
+        line = raw.strip()
+        if not line.startswith("data:"):
+            continue
+        payload = line[5:].strip()
+        if payload == "[DONE]":
+            break
+        try:
+            chunk = json.loads(payload)
+        except json.JSONDecodeError:
+            continue
+        if not model_name and chunk.get("model"):
+            model_name = chunk["model"]
+        if chunk.get("usage"):
+            usage = chunk["usage"]
+        choices = chunk.get("choices") or []
+        if choices:
+            delta = choices[0].get("delta") or {}
+            if delta.get("content"):
+                content_parts.append(delta["content"])
+            if choices[0].get("finish_reason"):
+                finish_reason = choices[0]["finish_reason"]
+    return {
+        "content": "".join(content_parts),
+        "model": model_name,
+        "usage": usage,
+        "finish_reason": finish_reason,
+    }
+
+
 def chat(
     messages: list[dict[str, Any]],
     model: str | None = None,
@@ -86,7 +125,7 @@ def chat(
         payload = {
             "model": m,
             "messages": messages,
-            "stream": False,
+            "stream": True,
             "temperature": temperature,
         }
         try:
@@ -95,11 +134,15 @@ def chat(
                 headers=_headers(),
                 json=payload,
                 timeout=timeout,
+                stream=True,
             )
             r.raise_for_status()
-            data = r.json()
-            _LAST_CHAT_MODEL = m
-            return data["choices"][0]["message"]["content"]
+            parsed = _parse_sse_stream(r)
+            content = parsed["content"]
+            if not content:
+                raise ValueError(f"empty content from {parsed.get('model', m)}")
+            _LAST_CHAT_MODEL = parsed.get("model") or m
+            return content
         except (requests.HTTPError, requests.RequestException, KeyError, ValueError) as e:
             last_err = e
             continue

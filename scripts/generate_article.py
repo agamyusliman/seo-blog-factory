@@ -52,8 +52,14 @@ ISI:
 - PENEMPATAN GAMBAR (wajib):
   - fig-01 setelah intro (sebelum H2 pertama).
   - fig-02… setelah H2 yang relevan (bukan diacak di akhir).
-  - Alt text = deskripsi **ilustrasi informatif** sesuai section: alur/proses, diagram, checklist, perbandingan, formula — BUKAN foto realistis orang.
-  - Contoh alt: "Ilustrasi alur order dari kasir ke dapur", "Diagram hitung HPP dan margin".
+  - Alt text wajib deskriptif sesuai konteks section:
+    * DEFAULT = ilustrasi scene pendukung (suasana warung/dapur/kasir/QR meja/gerobak) yang mendukung cerita section — BUKAN diagram.
+    * HANYA jika section menjelaskan proses/flow langkah-langkah → alt boleh sebut "diagram alur" / "flow".
+    * HANYA jika section menjelaskan rumus/HPP → alt boleh sebut "diagram rumus".
+    * HANYA jika section menjelaskan perbandingan paket → alt boleh sebut "perbandingan".
+  - Contoh alt scene: "Ilustrasi pemilik warung menghitung bahan di dapur", "Suasana pelanggan scan QR meja di kafe".
+  - Contoh alt diagram (hanya jika flow): "Diagram alur order dari kasir ke dapur".
+  - Jangan memaksa semua image jadi diagram — variasikan scene vs diagram sesuai sifat section.
   - Jangan menaruh semua gambar berurutan; sisipkan di tengah redaksi section terkait.
 - Patuhi FAKTA PRODUK & LEGAL: Basic Rp60.000 / Pro Rp120.000 (tahunan Rp576.000 / Rp1.152.000), trial 14 hari Pro sekali per WA, QRIS ~0,7% tanpa markup Kekasir, settlement ~T+2 hari kerja.
 - Self-order QR meja / KDS / reservasi = Pro (atau trial Pro).
@@ -108,7 +114,11 @@ Outline:
 Tulis artikel lengkap sekarang.
 Sisipkan tepat {n_images} gambar di section yang relevan:
 ![alt cocok section](images/fig-01.webp) … sampai fig-{n_images:02d}.webp
-Alt = deskripsi ilustrasi informatif (alur/diagram/checklist) sesuai paragraf di atas/bawah — bukan foto realistis, bukan "ilustrasi generik".
+Alt = deskripsi ilustrasi pendukung sesuai konteks section:
+- DEFAULT: scene illustration (suasana warung/dapur/kasir/QR meja/gerobak/booth) yang mendukung cerita section
+- DIAGRAM (flow/checklist/formula/comparison) HANYA jika section eksplisit menjelaskan proses/rumus/perbandingan paket
+- Jangan memaksa semua jadi diagram — variasikan scene vs diagram sesuai sifat section
+- Bukan foto realistis, bukan "ilustrasi generik"
 """
 
 
