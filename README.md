@@ -261,9 +261,9 @@ Rotate any key that was ever pasted into chat or a public log.
 
 ---
 
-## Docs index
+## Docs
 
-See [`docs/README.md`](./docs/README.md) for the full plan set (architecture, RAG, API, images, preview, public checklist).
+Internal planning notes and factory output live under local `docs/` (gitignored — not published with this repo). Use this README plus `rag/corpus/` and `scripts/` as the public reference.
 
 ---
 

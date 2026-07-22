@@ -48,6 +48,9 @@ data/panduan_assets_manifest.json
 content/**
 !content/.gitkeep
 
+# Local planning docs + factory output (not for public repo)
+docs/
+
 # Generated media (except brand logo source)
 *.webp
 !assets/brand/**
