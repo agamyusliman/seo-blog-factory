@@ -1,0 +1,290 @@
+[
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-SNK-001",
+  "name": "Kentang Goreng",
+  "category": "Camilan"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-SNK-002",
+  "name": "Sosis Goreng",
+  "category": "Camilan"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-SNK-003",
+  "name": "Tahu Cabe Garam",
+  "category": "Camilan"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-GRG-003",
+  "name": "Kuotie Ayam 4 pcs",
+  "category": "Dimsum Goreng"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-GRG-001",
+  "name": "Lumpia Kulit Tahu 3 pcs",
+  "category": "Dimsum Goreng"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-GRG-004",
+  "name": "Lumpia Udang 3 pcs",
+  "category": "Dimsum Goreng"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-GRG-002",
+  "name": "Pangsit Ayam Goreng 4 pcs",
+  "category": "Dimsum Goreng"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-KUK-005",
+  "name": "Dimsum Mentai 4 pcs",
+  "category": "Dimsum Kukus"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-KUK-003",
+  "name": "Dimsum Mix 4 pcs",
+  "category": "Dimsum Kukus"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-KUK-001",
+  "name": "Siomay Ayam 4 pcs",
+  "category": "Dimsum Kukus"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-KUK-002",
+  "name": "Siomay Udang 4 pcs",
+  "category": "Dimsum Kukus"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-DRK-003",
+  "name": "Air Mineral 600 ml",
+  "category": "Minuman"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-DRK-002",
+  "name": "Lemon Tea",
+  "category": "Minuman"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-DRK-001",
+  "name": "Teh Obeng",
+  "category": "Minuman"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-PKT-002",
+  "name": "Paket Camilan Berdua",
+  "category": "Paket"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-PKT-001",
+  "name": "Paket Kukus Santai",
+  "category": "Paket"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-SAU-001",
+  "name": "Chili Oil",
+  "category": "Saus Tambahan"
+ },
+ {
+  "tenant": "tenant_dmbas1",
+  "sku": "KG-SAU-002",
+  "name": "Saus Mentai",
+  "category": "Saus Tambahan"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-AYM-001",
+  "name": "Ayam Bakar Madu",
+  "category": "Ayam & Nasi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-AYM-002",
+  "name": "Ayam Geprek Sambal Bawang",
+  "category": "Ayam & Nasi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-AYM-004",
+  "name": "Ayam Goreng Lengkuas",
+  "category": "Ayam & Nasi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-AYM-003",
+  "name": "Ayam Penyet Sambal Terasi",
+  "category": "Ayam & Nasi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-NAS-001",
+  "name": "Nasi Putih",
+  "category": "Ayam & Nasi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-002",
+  "name": "Americano",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-003",
+  "name": "Caffe Latte",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-009",
+  "name": "Es Cokelat Hazelnut",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-008",
+  "name": "Es Kopi Pandan",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-006",
+  "name": "Kopi O",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-001",
+  "name": "Kopi Susu Gula Aren",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-010",
+  "name": "Kopi Tubruk",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-004",
+  "name": "Matcha Latte",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-COF-007",
+  "name": "Teh Tarik",
+  "category": "Kopi"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-SNK-004",
+  "name": "Bakwan Jagung",
+  "category": "Lauk & Camilan"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-SNK-002",
+  "name": "Kentang Goreng",
+  "category": "Lauk & Camilan"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-SNK-006",
+  "name": "Pisang Goreng Keju",
+  "category": "Lauk & Camilan"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-SNK-005",
+  "name": "Risoles Ayam",
+  "category": "Lauk & Camilan"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-SNK-001",
+  "name": "Tahu Tempe Goreng",
+  "category": "Lauk & Camilan"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-DRK-003",
+  "name": "Air Mineral 600 ml",
+  "category": "Minuman"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-DRK-002",
+  "name": "Es Jeruk",
+  "category": "Minuman"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-DRK-001",
+  "name": "Teh Obeng",
+  "category": "Minuman"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-PKT-001",
+  "name": "Paket Ayam Bakar",
+  "category": "Paket Hemat"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-PKT-003",
+  "name": "Paket Berdua",
+  "category": "Paket Hemat"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-PKT-005",
+  "name": "Paket Keluarga",
+  "category": "Paket Hemat"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-PKT-002",
+  "name": "Paket Rice Bowl Matah",
+  "category": "Paket Hemat"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-RBW-002",
+  "name": "Rice Bowl Ayam Lada Hitam",
+  "category": "Rice Bowl"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-RBW-001",
+  "name": "Rice Bowl Ayam Sambal Matah",
+  "category": "Rice Bowl"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-RBW-003",
+  "name": "Rice Bowl Ayam Teriyaki",
+  "category": "Rice Bowl"
+ },
+ {
+  "tenant": "tenant_dmpro1",
+  "sku": "DB-RBW-004",
+  "name": "Rice Bowl Telur Crispy",
+  "category": "Rice Bowl"
+ }
+]
